@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYC Tax & SALT Calculator 2025</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font for numbers -->
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+        input[type=range] {
+            -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+            width: 100%; /* Specific width is required for Firefox. */
+            background: transparent; /* Otherwise white in Chrome */
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: currentColor;
+            cursor: pointer;
+            margin-top: -6px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #e2e8f0;
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 p-4 md:p-8">
+
+    <div class="max-w-6xl mx-auto">
+        
+        <!-- Header -->
+        <header class="mb-8 text-center md:text-left">
+            <div class="flex flex-col md:flex-row items-center md:justify-between gap-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-800 flex items-center justify-center md:justify-start gap-2">
+                        <!-- Building Icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><path d="M9 22v-4h6v4"/><path d="M8 6h.01"/><path d="M16 6h.01"/><path d="M12 6h.01"/><path d="M12 10h.01"/><path d="M12 14h.01"/><path d="M16 10h.01"/><path d="M16 14h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg>
+                        NYC Tax & SALT Calculator (2025)
+                    </h1>
+                    <p class="text-slate-600 mt-1">
+                        Single Filer • Wage + Cap Gains • NYS/NYC Integrated • SALT Phaseout
+                    </p>
+                </div>
+                <div class="flex items-center gap-2 bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    New York, NY
+                </div>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- LEFT COLUMN: Inputs -->
+            <div class="lg:col-span-5 space-y-6">
+                
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 text-slate-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                        Income & Asset Actions
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Wages -->
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <label class="block text-sm font-medium text-slate-700">Wages / Salary</label>
+                                <span class="text-lg font-bold text-slate-900" id="disp-wages">$250,000</span>
+                            </div>
+                            <input type="range" min="0" max="1000000" step="1000" value="250000" id="input-wages-range" class="text-blue-600 mb-2">
+                            <input type="number" value="250000" id="input-wages-num" class="w-full p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition text-sm text-slate-600">
+                        </div>
+
+                        <!-- Sell Stock Section -->
+                        <div class="pt-4 border-t border-slate-200 space-y-4">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Investments</h3>
+                            
+                            <div class="bg-emerald-50 p-3 rounded-lg border border-emerald-100">
+                                <div class="flex justify-between items-end mb-2">
+                                    <label class="block text-sm font-medium text-emerald-900 flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-600"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                                        Sell Stock (<span id="disp-sell-rate">0</span>%)
+                                    </label>
+                                    <span class="text-base font-bold text-emerald-700" id="disp-sell-amt">$0</span>
+                                </div>
+                                <input type="range" min="0" max="50" step="1" value="0" id="input-sell-rate" class="text-emerald-600 mb-3">
+                                
+                                <div id="sell-gain-container" class="flex justify-between items-center text-xs hidden">
+                                    <div class="text-slate-500">Basis: <span id="disp-sell-basis-pct">10</span>%</div>
+                                    <div class="text-right">
+                                        <div class="text-slate-400">Realized Gain</div>
+                                        <div class="font-bold text-emerald-700" id="disp-realized-gain">$0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Donation Section -->
+                        <div class="pt-4 border-t border-slate-200 space-y-4">
+                            <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider">Charitable Giving</h3>
+                            
+                            <!-- Cash Tithe -->
+                            <div>
+                                <div class="flex justify-between items-end mb-2">
+                                    <label class="block text-sm font-medium text-slate-700 flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-pink-500"><path d="M19 14c1.49-1.28 3.6-2.34 4.58-2.74a5.5 5.5 0 0 1-5.5 5.5H8a5.5 5.5 0 0 1-5.5-5.5c1.03.4 3.1 1.46 4.58 2.74"/><path d="M12 2a5.5 5.5 0 0 0-5.5 5.5v2.17h11V7.5A5.5 5.5 0 0 0 12 2Z"/></svg>
+                                        Cash Tithe (<span id="disp-tithe-rate">0</span>%)
+                                    </label>
+                                    <span class="text-base font-bold text-pink-600" id="disp-tithe-amt">$0</span>
+                                </div>
+                                <input type="range" min="0" max="20" step="1" value="0" id="input-tithe-rate" class="text-pink-500 mb-2">
+                                
+                                <!-- Link Checkbox -->
+                                <div class="flex items-center gap-2 mt-2">
+                                    <input type="checkbox" id="link-tithe" class="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 border-gray-300">
+                                    <label for="link-tithe" class="text-xs text-slate-600 flex items-center gap-1 cursor-pointer select-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                                        Match Cash Tithe to Stock Sale %
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Stock Donation -->
+                            <div class="bg-purple-50 p-3 rounded-lg border border-purple-100">
+                                <div class="flex justify-between items-end mb-2">
+                                    <label class="block text-sm font-medium text-purple-900 flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-600"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                                        Donate Stock (<span id="disp-stock-rate">0</span>%)
+                                    </label>
+                                    <span class="text-base font-bold text-purple-700" id="disp-stock-amt">$0</span>
+                                </div>
+                                <input type="range" min="0" max="20" step="1" value="0" id="input-stock-rate" class="text-purple-600 mb-3">
+                                
+                                <div id="donate-gain-container" class="flex justify-between items-center text-xs hidden">
+                                    <div class="text-slate-500">Basis: <span id="disp-donate-basis-pct">10</span>%</div>
+                                    <div class="text-right">
+                                        <div class="text-slate-400">Gain</div>
+                                        <div class="font-bold text-purple-700" id="disp-donate-gain">$0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Unified Basis Slider -->
+                        <div id="basis-container" class="pt-4 border-t border-slate-200 hidden">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">
+                                Original Cost Basis % <span class="font-mono text-slate-500 ml-1">(<span id="disp-basis-val">10</span>%)</span>
+                            </label>
+                            <p class="text-xs text-slate-400 mb-2">Applies to both Stock Sales and Donations</p>
+                            <input type="range" min="0" max="100" value="10" id="input-basis" class="text-slate-500 h-1">
+                        </div>
+
+                        <div class="pt-4 border-t border-slate-200">
+                            <label class="block text-sm font-medium text-slate-700 mb-3">Taxes & Deductions</label>
+                            
+                            <div class="space-y-4">
+                                <!-- 401k -->
+                                <div>
+                                    <div class="flex justify-between items-end mb-1">
+                                        <span class="text-xs text-slate-500 block">Pre-Tax 401k Contribution</span>
+                                        <span class="text-xs font-mono text-slate-600" id="disp-401k">$0</span>
+                                    </div>
+                                    <input type="range" min="0" max="23500" step="500" value="0" id="input-401k-range" class="text-slate-500 mb-2 h-1">
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-2 text-slate-400">$</span>
+                                        <input type="number" value="0" max="23500" id="input-401k-num" class="w-full pl-6 p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                    </div>
+                                </div>
+
+                                <!-- Property Tax -->
+                                <div>
+                                    <span class="text-xs text-slate-500 block mb-1">Annual Property Taxes</span>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-2 text-slate-400">$</span>
+                                        <input type="number" value="0" id="input-property-tax" class="w-full pl-6 p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                    </div>
+                                </div>
+
+                                <!-- Other -->
+                                <div>
+                                    <span class="text-xs text-slate-500 block mb-1">Other Itemized Deductions <span class="text-[10px] text-slate-400">(e.g. Mortgage Interest)</span></span>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-2 text-slate-400">$</span>
+                                        <input type="number" value="0" id="input-other-deductions" class="w-full pl-6 p-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-blue-500 outline-none transition">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: Analysis -->
+            <div class="lg:col-span-7 space-y-6">
+                
+                <!-- Tax Summary Card -->
+                <div class="bg-white rounded-xl shadow-xl border-t-4 border-blue-600 p-6">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4">Estimated 2025 Liability</h3>
+                    <div class="space-y-3 text-sm">
+                        
+                        <div class="flex justify-between items-end border-b border-slate-200 pb-2">
+                            <span class="text-slate-600">Total AGI (Wages + Gain - 401k)</span>
+                            <span class="font-mono font-bold text-slate-800" id="res-total-agi">$0</span>
+                        </div>
+
+                        <div class="flex justify-between items-end border-b border-slate-200 pb-2">
+                            <span class="text-slate-600">Federal Taxable Income</span>
+                            <span class="font-mono font-bold text-slate-800" id="res-fed-taxable">$0</span>
+                        </div>
+
+                        <div class="flex justify-between items-end border-b border-slate-200 pb-2">
+                            <div class="flex flex-col">
+                                <span class="text-slate-600">Federal Income Tax</span>
+                                <span class="text-[10px] text-slate-400" id="res-fed-breakdown"></span>
+                            </div>
+                            <span class="font-mono font-bold text-slate-800" id="res-fed-tax">$0</span>
+                        </div>
+                        <div class="flex justify-between items-end border-b border-slate-200 pb-2">
+                            <span class="text-slate-600">FICA (SS + Medicare)</span>
+                            <span class="font-mono font-bold text-slate-800" id="res-fica">$0</span>
+                        </div>
+                        <div class="flex justify-between items-end border-b border-slate-200 pb-2">
+                            <span class="text-slate-600">NY State Tax</span>
+                            <span class="font-mono font-bold text-slate-800" id="res-nys">$0</span>
+                        </div>
+                        <div class="flex justify-between items-end border-b border-slate-200 pb-2">
+                            <span class="text-slate-600">NYC Local Tax</span>
+                            <span class="font-mono font-bold text-slate-800" id="res-nyc">$0</span>
+                        </div>
+                        
+                        <div class="flex justify-between items-end pt-4 mb-2">
+                            <span class="text-slate-800 font-bold text-base">Total Tax Bill</span>
+                            <span class="text-xl font-bold text-red-600" id="res-total-bill">$0</span>
+                        </div>
+
+                        <!-- Take Home Pay Row -->
+                        <div class="bg-green-50 p-3 rounded-lg border border-green-200 flex justify-between items-center">
+                            <div class="flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2h2v-4h-2c0-1-.5-1.5-1-2h0V5z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h0"/></svg>
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-green-900">Est. Take Home / Net Cash</span>
+                                    <span class="text-[10px] text-green-700">(Income + Sold Stock) - (401k + Tax + Cash Tithe)</span>
+                                </div>
+                            </div>
+                            <span class="text-2xl font-bold text-green-700" id="res-take-home">$0</span>
+                        </div>
+
+                        <div class="text-right text-xs text-slate-500 mt-1">
+                            Effective Tax Rate: <span class="text-slate-900 font-bold" id="res-effective-rate">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stock Donation Benefit Card (Conditional) -->
+                <div id="card-donation-benefit" class="bg-purple-50 border-l-4 border-purple-600 rounded-xl shadow-lg p-6 hidden">
+                    <div class="flex items-center gap-2 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-700"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+                        <h2 class="text-lg font-bold text-purple-900">Avoided Capital Gains (The "Triple Play")</h2>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-4 mb-4 text-center md:text-left">
+                        <div class="bg-white p-3 rounded-lg shadow-sm">
+                            <div class="text-xs text-slate-500 uppercase font-bold">Fed Avoided</div>
+                            <div class="text-lg font-bold text-green-600" id="res-avoided-fed">$0</div>
+                            <div class="text-[10px] text-slate-400" id="res-avoided-fed-desc">0% Rate + 0% NIIT</div>
+                        </div>
+                        <div class="bg-white p-3 rounded-lg shadow-sm">
+                            <div class="text-xs text-slate-500 uppercase font-bold">NY/NYC Avoided</div>
+                            <div class="text-lg font-bold text-green-600" id="res-avoided-ny">$0</div>
+                            <div class="text-[10px] text-slate-400">Taxed as Ordinary</div>
+                        </div>
+                        <div class="bg-purple-600 text-white p-3 rounded-lg shadow-sm">
+                            <div class="text-xs text-purple-200 uppercase font-bold">Total Saved</div>
+                            <div class="text-lg font-bold" id="res-avoided-total">$0</div>
+                            <div class="text-[10px] text-purple-200">On top of deduction!</div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-purple-800">
+                        By donating stock instead of selling, you avoided paying taxes on the <strong id="res-avoided-gain-base">$0</strong> gain.
+                    </div>
+                </div>
+
+                <!-- SALT Phaseout Analysis -->
+                <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-orange-500">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-orange-600"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>
+                                SALT Deduction Analysis
+                            </h2>
+                            <p class="text-sm text-slate-500">OBBBA Rules: $40k Cap with Phaseout &gt; $500k</p>
+                        </div>
+                        <span id="res-phaseout-badge" class="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">Full Cap Available</span>
+                    </div>
+
+                    <div class="grid md:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-slate-100 p-3 rounded-lg text-center">
+                            <div class="text-xs text-slate-500 mb-1">Total SALT Paid</div>
+                            <div class="text-lg font-bold text-slate-800" id="res-salt-paid">$0</div>
+                        </div>
+                        <div class="bg-slate-100 p-3 rounded-lg text-center">
+                            <div class="text-xs text-slate-500 mb-1">Your 2025 Cap</div>
+                            <div class="text-lg font-bold text-blue-600" id="res-salt-cap">$40,000</div>
+                        </div>
+                        <div class="bg-slate-100 p-3 rounded-lg text-center">
+                            <div class="text-xs text-slate-500 mb-1">Allowable Deduction</div>
+                            <div class="text-lg font-bold text-green-600" id="res-salt-allowable">$0</div>
+                        </div>
+                    </div>
+                    
+                    <div id="salt-phaseout-warning" class="mt-4 bg-orange-50 p-3 rounded text-sm text-orange-800 hidden">
+                        <strong>Note:</strong> Your Total AGI (<span id="res-warn-agi"></span>) triggered the phaseout. Capital Gains count towards this limit!
+                    </div>
+                </div>
+
+                <!-- Deduction Strategy Chart -->
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-xl font-semibold mb-6 flex items-center gap-2 text-slate-800">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-600"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+                        Deduction Strategy
+                    </h2>
+                    
+                    <div class="flex flex-col md:flex-row items-center justify-around gap-8">
+                        <!-- CSS Bar Chart -->
+                        <div class="w-full md:w-1/2 h-48 flex items-end justify-center gap-8 px-4 pb-2 border-b border-slate-200">
+                            <!-- Standard Bar -->
+                            <div class="flex flex-col items-center w-20 group relative h-full justify-end">
+                                <div class="mb-1 text-xs font-bold text-slate-600" id="chart-std-val">$15,750</div>
+                                <div id="chart-std-bar" class="w-full bg-slate-400 rounded-t transition-all duration-500" style="height: 20%"></div>
+                                <div class="mt-2 text-xs font-medium text-slate-500">Standard</div>
+                            </div>
+                            <!-- Itemized Bar -->
+                            <div class="flex flex-col items-center w-20 group relative h-full justify-end">
+                                <div class="mb-1 text-xs font-bold text-slate-600" id="chart-item-val">$0</div>
+                                <div id="chart-item-bar" class="w-full bg-green-600 rounded-t transition-all duration-500" style="height: 20%"></div>
+                                <div class="mt-2 text-xs font-medium text-slate-500">Itemized</div>
+                            </div>
+                        </div>
+
+                        <!-- Details -->
+                        <div class="w-full md:w-1/2 space-y-4">
+                            <div id="strategy-std-box" class="p-4 rounded-lg border-2 border-slate-200">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-slate-700">Standard Deduction</span>
+                                    <span class="font-bold text-lg">$15,750</span>
+                                </div>
+                                <div id="std-rec-tag" class="text-xs text-green-700 mt-1 font-bold hidden">Recommended</div>
+                            </div>
+
+                            <div id="strategy-item-box" class="p-4 rounded-lg border-2 border-green-500 bg-green-50">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-slate-700">Itemized Deduction</span>
+                                    <span class="font-bold text-lg" id="res-itemized-total">$0</span>
+                                </div>
+                                <div id="item-rec-tag" class="text-xs text-green-700 mt-1 font-bold">Recommended</div>
+                                
+                                <div class="mt-3 text-xs text-slate-500 space-y-1 border-t border-slate-200 pt-2">
+                                    <div class="flex justify-between">
+                                        <span>Allowed SALT:</span>
+                                        <span id="break-salt">$0</span>
+                                    </div>
+                                    <div class="flex justify-between text-pink-600 font-medium">
+                                        <span>Cash Tithe:</span>
+                                        <span id="break-tithe">$0</span>
+                                    </div>
+                                    <div class="flex justify-between text-purple-600 font-medium">
+                                        <span>Stock Donation:</span>
+                                        <span id="break-stock">$0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Other:</span>
+                                        <span id="break-other">$0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        
+        <footer class="mt-12 text-center text-slate-400 text-sm">
+            <p class="mb-2">
+                * Uses 2025 "OBBBA" legislation rules ($40k SALT cap, $500k phaseout). NYS & NYC taxes estimated using 2025 brackets.
+            </p>
+            <p>
+                Assumes stock donation deductibility limits (e.g. 30% AGI) are not exceeded for simplicity.
+            </p>
+            <p>
+                Educational purposes only. Does not constitute professional tax advice.
+            </p>
+        </footer>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // --- CONSTANTS ---
+        const STANDARD_DEDUCTION_FED = 15750;
+        const STANDARD_DEDUCTION_NY = 8000;
+        const SALT_CAP_BASE = 40000;
+        const SALT_CAP_FLOOR = 10000;
+        const PHASEOUT_THRESHOLD = 500000;
+        const PHASEOUT_RATE = 0.30;
+        
+        const SS_WAGE_BASE = 176100;
+        const SS_RATE = 0.062;
+        const MEDICARE_RATE = 0.0145;
+        const ADDL_MEDICARE_THRESHOLD = 200000;
+        const ADDL_MEDICARE_RATE = 0.009;
+        const NIIT_THRESHOLD = 200000;
+        const NIIT_RATE = 0.038;
+
+        const FED_BRACKETS = [
+            { rate: 0.10, min: 0, max: 11925 },
+            { rate: 0.12, min: 11925, max: 48475 },
+            { rate: 0.22, min: 48475, max: 103350 },
+            { rate: 0.24, min: 103350, max: 197300 },
+            { rate: 0.32, min: 197300, max: 250525 },
+            { rate: 0.35, min: 250525, max: 626350 },
+            { rate: 0.37, min: 626350, max: Infinity },
+        ];
+
+        const LTCG_BRACKETS = [
+            { rate: 0.00, max: 48350 },
+            { rate: 0.15, max: 533400 },
+            { rate: 0.20, max: Infinity },
+        ];
+
+        const NYS_BRACKETS = [
+            { rate: 0.0400, min: 0, max: 8500 },
+            { rate: 0.0450, min: 8500, max: 11700 },
+            { rate: 0.0525, min: 11700, max: 13900 },
+            { rate: 0.0550, min: 13900, max: 80650 },
+            { rate: 0.0600, min: 80650, max: 215400 },
+            { rate: 0.0685, min: 215400, max: 1077550 },
+            { rate: 0.0965, min: 1077550, max: 5000000 },
+            { rate: 0.1030, min: 5000000, max: 25000000 },
+            { rate: 0.1090, min: 25000000, max: Infinity },
+        ];
+
+        const NYC_BRACKETS = [
+            { rate: 0.03078, min: 0, max: 12000 },
+            { rate: 0.03762, min: 12000, max: 25000 },
+            { rate: 0.03819, min: 25000, max: 50000 },
+            { rate: 0.03876, min: 50000, max: Infinity },
+        ];
+
+        // --- STATE ---
+        const state = {
+            wages: 250000,
+            propertyTax: 0,
+            otherDeductions: 0,
+            preTax401k: 0,
+            titheRate: 0,
+            stockRate: 0,
+            sellStockRate: 0,
+            costBasisPct: 10,
+            linkTithe: false
+        };
+
+        // --- HELPERS ---
+        const fmtMoney = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+        const fmtPct = (n) => new Intl.NumberFormat('en-US', { style: 'percent', minimumFractionDigits: 1, maximumFractionDigits: 2 }).format(n);
+
+        function calculateProgressiveTax(taxableIncome, brackets) {
+            let totalTax = 0;
+            let marginalRate = 0;
+            for (let b of brackets) {
+                if (taxableIncome > b.min) {
+                    const taxableAmount = Math.min(taxableIncome, b.max) - b.min;
+                    totalTax += taxableAmount * b.rate;
+                    marginalRate = b.rate;
+                }
+            }
+            return { totalTax, marginalRate };
+        }
+
+        function calculateLTCGTax(ordinaryIncome, gainAmount) {
+            let tax = 0;
+            let currentTotal = ordinaryIncome;
+            let remainingGain = gainAmount;
+
+            // 0% Tier
+            let limit = LTCG_BRACKETS[0].max;
+            let space = Math.max(0, limit - currentTotal);
+            let portion = Math.min(remainingGain, space);
+            currentTotal += portion;
+            remainingGain -= portion;
+
+            // 15% Tier
+            limit = LTCG_BRACKETS[1].max;
+            space = Math.max(0, limit - currentTotal);
+            portion = Math.min(remainingGain, space);
+            tax += portion * 0.15;
+            currentTotal += portion;
+            remainingGain -= portion;
+
+            // 20% Tier
+            tax += remainingGain * 0.20;
+            return tax;
+        }
+
+        function getCapGainsRate(income) {
+            if (income < LTCG_BRACKETS[0].max) return 0;
+            if (income < LTCG_BRACKETS[1].max) return 0.15;
+            return 0.20;
+        }
+
+        // --- CORE CALCULATION ---
+        function calculate() {
+            // Adjust Wages for 401k
+            const adjustedWages = Math.max(0, state.wages - state.preTax401k);
+
+            // Donations
+            const cashTitheAmount = state.wages * (state.titheRate / 100);
+            const stockDonationFMV = state.wages * (state.stockRate / 100);
+            const totalDonation = cashTitheAmount + stockDonationFMV;
+
+            const stockBasisDonated = stockDonationFMV * (state.costBasisPct / 100);
+            const stockGainDonated = Math.max(0, stockDonationFMV - stockBasisDonated);
+
+            // Stock Sale
+            const sellStockAmount = state.wages * (state.sellStockRate / 100);
+            const sellStockBasis = sellStockAmount * (state.costBasisPct / 100);
+            const capitalGainRealized = Math.max(0, sellStockAmount - sellStockBasis);
+
+            // Total AGI
+            const totalAGI = adjustedWages + capitalGainRealized;
+
+            // --- 1. State/City (Gain is ordinary) ---
+            const nyItemized = state.propertyTax + state.otherDeductions + totalDonation;
+            const nyDeduction = Math.max(STANDARD_DEDUCTION_NY, nyItemized);
+            const nyTaxableIncome = Math.max(0, totalAGI - nyDeduction);
+
+            const nysRes = calculateProgressiveTax(nyTaxableIncome, NYS_BRACKETS);
+            const nycRes = calculateProgressiveTax(nyTaxableIncome, NYC_BRACKETS);
+            const totalIncomeTaxSALT = nysRes.totalTax + nycRes.totalTax;
+
+            // --- 2. SALT Phaseout ---
+            const totalSaltPaid = state.propertyTax + totalIncomeTaxSALT;
+            let saltCap = SALT_CAP_BASE;
+            if (totalAGI > PHASEOUT_THRESHOLD) {
+                const excess = totalAGI - PHASEOUT_THRESHOLD;
+                const reduction = excess * PHASEOUT_RATE;
+                saltCap = Math.max(SALT_CAP_FLOOR, SALT_CAP_BASE - reduction);
+            }
+            const allowableSalt = Math.min(totalSaltPaid, saltCap);
+
+            // --- 3. Federal Taxable ---
+            const totalItemized = allowableSalt + state.otherDeductions + totalDonation;
+            const useStandard = STANDARD_DEDUCTION_FED > totalItemized;
+            const finalFedDeduction = useStandard ? STANDARD_DEDUCTION_FED : totalItemized;
+            const fedTaxableIncome = Math.max(0, totalAGI - finalFedDeduction);
+
+            // --- 4. Federal Tax ---
+            const ordinaryTaxable = Math.max(0, adjustedWages - finalFedDeduction);
+            const ltcgTaxable = Math.max(0, fedTaxableIncome - ordinaryTaxable);
+
+            const fedOrdRes = calculateProgressiveTax(ordinaryTaxable, FED_BRACKETS);
+            const fedCapGainsTax = calculateLTCGTax(ordinaryTaxable, ltcgTaxable);
+            
+            const niitBase = Math.min(capitalGainRealized, Math.max(0, totalAGI - NIIT_THRESHOLD));
+            const niitTax = niitBase * NIIT_RATE;
+            
+            const totalFedTax = fedOrdRes.totalTax + fedCapGainsTax + niitTax;
+
+            // --- 5. FICA (On Gross Wages) ---
+            const ssTax = Math.min(state.wages, SS_WAGE_BASE) * SS_RATE;
+            const medTax = state.wages * MEDICARE_RATE;
+            const addlMedTax = Math.max(0, state.wages - ADDL_MEDICARE_THRESHOLD) * ADDL_MEDICARE_RATE;
+            const totalFica = ssTax + medTax + addlMedTax;
+
+            // --- 6. Avoided Gains ---
+            const projTaxableIfSold = fedTaxableIncome + stockGainDonated;
+            const avoidedFedRate = getCapGainsRate(projTaxableIfSold);
+            const avoidedNiit = (totalAGI + stockGainDonated > NIIT_THRESHOLD) ? NIIT_RATE : 0;
+            const totalFedAvoidedRate = avoidedFedRate + avoidedNiit;
+
+            const avoidedFed = stockGainDonated * totalFedAvoidedRate;
+            const avoidedNy = stockGainDonated * (nysRes.marginalRate + nycRes.marginalRate);
+            const totalAvoided = avoidedFed + avoidedNy;
+
+            // --- 7. Totals ---
+            const totalTaxBill = totalFedTax + totalFica + totalIncomeTaxSALT;
+            const effectiveRate = totalAGI > 0 ? (totalTaxBill / totalAGI) : 0;
+            const takeHomePay = (state.wages + sellStockAmount) - state.preTax401k - totalTaxBill - cashTitheAmount;
+
+            return {
+                wages: state.wages,
+                totalAGI,
+                fedTaxableIncome,
+                totalFedTax,
+                fedCapGainsTax,
+                niitTax,
+                fedOrdTax: fedOrdRes.totalTax,
+                totalFica,
+                nysTax: nysRes.totalTax,
+                nycTax: nycRes.totalTax,
+                totalTaxBill,
+                takeHomePay,
+                effectiveRate,
+                avoidedFed,
+                avoidedNy,
+                totalAvoided,
+                stockGainDonated,
+                fedAvoidedRateDesc: `${(avoidedFedRate*100).toFixed(0)}% Rate + ${(avoidedNiit*100).toFixed(1)}% NIIT`,
+                saltCap,
+                totalSaltPaid,
+                allowableSalt,
+                isPhaseout: totalAGI > PHASEOUT_THRESHOLD,
+                useStandard,
+                itemizedTotal: totalItemized,
+                cashTitheAmount,
+                stockDonationFMV,
+                sellStockAmount,
+                capitalGainRealized,
+                sellStockBasis,
+                costBasisPct: state.costBasisPct
+            };
+        }
+
+        // --- UPDATE UI ---
+        function updateUI() {
+            const res = calculate();
+
+            // Text Outputs
+            document.getElementById('res-total-agi').innerText = fmtMoney(res.totalAGI);
+            document.getElementById('res-fed-taxable').innerText = fmtMoney(res.fedTaxableIncome);
+            document.getElementById('res-fed-tax').innerText = fmtMoney(res.totalFedTax);
+            
+            let fedBreakdown = "";
+            if (res.fedCapGainsTax > 0 || res.niitTax > 0) {
+                fedBreakdown = `(Ord: ${fmtMoney(res.fedOrdTax)} | CGT: ${fmtMoney(res.fedCapGainsTax)} | NIIT: ${fmtMoney(res.niitTax)})`;
+            }
+            document.getElementById('res-fed-breakdown').innerText = fedBreakdown;
+
+            document.getElementById('res-fica').innerText = fmtMoney(res.totalFica);
+            document.getElementById('res-nys').innerText = fmtMoney(res.nysTax);
+            document.getElementById('res-nyc').innerText = fmtMoney(res.nycTax);
+            document.getElementById('res-total-bill').innerText = fmtMoney(res.totalTaxBill);
+            document.getElementById('res-take-home').innerText = fmtMoney(res.takeHomePay);
+            document.getElementById('res-effective-rate').innerText = fmtPct(res.effectiveRate);
+
+            // Donation Card
+            if (state.stockRate > 0) {
+                document.getElementById('card-donation-benefit').classList.remove('hidden');
+                document.getElementById('res-avoided-fed').innerText = fmtMoney(res.avoidedFed);
+                document.getElementById('res-avoided-fed-desc').innerText = res.fedAvoidedRateDesc;
+                document.getElementById('res-avoided-ny').innerText = fmtMoney(res.avoidedNy);
+                document.getElementById('res-avoided-total').innerText = fmtMoney(res.totalAvoided);
+                document.getElementById('res-avoided-gain-base').innerText = fmtMoney(res.stockGainDonated);
+                document.getElementById('donate-gain-container').classList.remove('hidden');
+                document.getElementById('disp-donate-gain').innerText = fmtMoney(res.stockGainDonated);
+            } else {
+                document.getElementById('card-donation-benefit').classList.add('hidden');
+                document.getElementById('donate-gain-container').classList.add('hidden');
+            }
+
+            // SALT Phaseout
+            document.getElementById('res-salt-paid').innerText = fmtMoney(res.totalSaltPaid);
+            document.getElementById('res-salt-cap').innerText = fmtMoney(res.saltCap);
+            document.getElementById('res-salt-allowable').innerText = fmtMoney(res.allowableSalt);
+            
+            const badge = document.getElementById('res-phaseout-badge');
+            const warnBox = document.getElementById('salt-phaseout-warning');
+            
+            if (res.isPhaseout) {
+                badge.className = "bg-red-100 text-red-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider";
+                badge.innerText = "Phaseout Active";
+                warnBox.classList.remove('hidden');
+                document.getElementById('res-warn-agi').innerText = fmtMoney(res.totalAGI);
+                document.getElementById('res-salt-cap').classList.remove('text-blue-600');
+                document.getElementById('res-salt-cap').classList.add('text-orange-600');
+            } else {
+                badge.className = "bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider";
+                badge.innerText = "Full Cap Available";
+                warnBox.classList.add('hidden');
+                document.getElementById('res-salt-cap').classList.add('text-blue-600');
+                document.getElementById('res-salt-cap').classList.remove('text-orange-600');
+            }
+
+            // Sell Stock UI
+            if (state.sellStockRate > 0) {
+                document.getElementById('sell-gain-container').classList.remove('hidden');
+                document.getElementById('disp-realized-gain').innerText = fmtMoney(res.capitalGainRealized);
+                document.getElementById('basis-container').classList.remove('hidden');
+            } else {
+                document.getElementById('sell-gain-container').classList.add('hidden');
+                // Only hide basis if stock donation is also 0
+                if(state.stockRate === 0) document.getElementById('basis-container').classList.add('hidden');
+            }
+            if(state.stockRate > 0) document.getElementById('basis-container').classList.remove('hidden');
+
+
+            // Deduction Strategy Chart
+            const stdVal = STANDARD_DEDUCTION_FED;
+            const itemVal = res.itemizedTotal;
+            const maxVal = Math.max(stdVal, itemVal) * 1.2; // Scaling
+
+            document.getElementById('chart-std-val').innerText = fmtMoney(stdVal);
+            document.getElementById('chart-std-bar').style.height = `${(stdVal / maxVal) * 100}%`;
+            document.getElementById('chart-item-val').innerText = fmtMoney(itemVal);
+            document.getElementById('chart-item-bar').style.height = `${(itemVal / maxVal) * 100}%`;
+
+            // Coloring bars based on recommendation
+            const stdBar = document.getElementById('chart-std-bar');
+            const itemBar = document.getElementById('chart-item-bar');
+            const stdRec = document.getElementById('std-rec-tag');
+            const itemRec = document.getElementById('item-rec-tag');
+            const stdBox = document.getElementById('strategy-std-box');
+            const itemBox = document.getElementById('strategy-item-box');
+
+            if (res.useStandard) {
+                stdBar.className = "w-full bg-green-600 rounded-t transition-all duration-500";
+                itemBar.className = "w-full bg-slate-400 rounded-t transition-all duration-500";
+                stdRec.classList.remove('hidden');
+                itemRec.classList.add('hidden');
+                stdBox.className = "p-4 rounded-lg border-2 border-green-500 bg-green-50";
+                itemBox.className = "p-4 rounded-lg border-2 border-slate-200";
+            } else {
+                stdBar.className = "w-full bg-slate-400 rounded-t transition-all duration-500";
+                itemBar.className = "w-full bg-green-600 rounded-t transition-all duration-500";
+                stdRec.classList.add('hidden');
+                itemRec.classList.remove('hidden');
+                stdBox.className = "p-4 rounded-lg border-2 border-slate-200";
+                itemBox.className = "p-4 rounded-lg border-2 border-green-500 bg-green-50";
+            }
+
+            // Fill Strategy Details
+            document.getElementById('res-itemized-total').innerText = fmtMoney(itemVal);
+            document.getElementById('break-salt').innerText = fmtMoney(res.allowableSalt);
+            document.getElementById('break-tithe').innerText = fmtMoney(res.cashTitheAmount);
+            document.getElementById('break-stock').innerText = fmtMoney(res.stockDonationFMV);
+            document.getElementById('break-other').innerText = fmtMoney(state.otherDeductions);
+
+            // Display Input Values
+            document.getElementById('disp-wages').innerText = fmtMoney(state.wages);
+            document.getElementById('disp-tithe-rate').innerText = state.titheRate;
+            document.getElementById('disp-tithe-amt').innerText = fmtMoney(res.cashTitheAmount);
+            document.getElementById('disp-stock-rate').innerText = state.stockRate;
+            document.getElementById('disp-stock-amt').innerText = fmtMoney(res.stockDonationFMV);
+            document.getElementById('disp-basis-val').innerText = state.costBasisPct;
+            document.getElementById('disp-donate-basis-pct').innerText = state.costBasisPct;
+            document.getElementById('disp-sell-basis-pct').innerText = state.costBasisPct;
+            
+            document.getElementById('disp-sell-rate').innerText = state.sellStockRate;
+            document.getElementById('disp-sell-amt').innerText = fmtMoney(res.sellStockAmount);
+            
+            document.getElementById('disp-401k').innerText = fmtMoney(state.preTax401k);
+        }
+
+        // --- EVENT LISTENERS ---
+        function attach(id, key, isNum = false) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('input', (e) => {
+                const val = parseFloat(e.target.value) || 0;
+                state[key] = val;
+                
+                // Sync Range/Number pairs
+                if (id.includes('range')) {
+                    const numId = id.replace('range', 'num');
+                    const numEl = document.getElementById(numId);
+                    if (numEl) numEl.value = val;
+                }
+                if (id.includes('num')) {
+                    const rangeId = id.replace('num', 'range');
+                    const rangeEl = document.getElementById(rangeId);
+                    if (rangeEl) rangeEl.value = val;
+                }
+
+                // Handle Link Logic
+                if (key === 'sellStockRate' && state.linkTithe) {
+                    state.titheRate = val;
+                    document.getElementById('input-tithe-rate').value = val;
+                }
+
+                updateUI();
+            });
+        }
+
+        // Wages
+        attach('input-wages-range', 'wages');
+        attach('input-wages-num', 'wages');
+        
+        // Sell Stock
+        attach('input-sell-rate', 'sellStockRate');
+        
+        // Tithe
+        attach('input-tithe-rate', 'titheRate');
+        
+        // Stock Donation
+        attach('input-stock-rate', 'stockRate');
+        
+        // Basis
+        attach('input-basis', 'costBasisPct');
+        
+        // 401k
+        attach('input-401k-range', 'preTax401k');
+        attach('input-401k-num', 'preTax401k');
+        
+        // Others
+        attach('input-property-tax', 'propertyTax');
+        attach('input-other-deductions', 'otherDeductions');
+
+        // Checkbox
+        document.getElementById('link-tithe').addEventListener('change', (e) => {
+            state.linkTithe = e.target.checked;
+            const titheInput = document.getElementById('input-tithe-rate');
+            
+            if (state.linkTithe) {
+                state.titheRate = state.sellStockRate;
+                titheInput.value = state.sellStockRate;
+                titheInput.disabled = true;
+                titheInput.classList.add('cursor-not-allowed', 'opacity-50');
+                titheInput.classList.remove('cursor-pointer');
+            } else {
+                titheInput.disabled = false;
+                titheInput.classList.remove('cursor-not-allowed', 'opacity-50');
+                titheInput.classList.add('cursor-pointer');
+            }
+            updateUI();
+        });
+
+        // Initialize
+        updateUI();
+
+    </script>
+</body>
+</html>
