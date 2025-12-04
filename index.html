@@ -88,11 +88,12 @@
                                 <div class="flex justify-between items-end mb-2">
                                     <label class="block text-sm font-medium text-emerald-900 flex items-center gap-1">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-emerald-600"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-                                        Sell Stock (<span id="disp-sell-rate">0</span>%)
+                                        Sell Stock (LTCG) (<span id="disp-sell-rate">0</span>%)
                                     </label>
                                     <span class="text-base font-bold text-emerald-700" id="disp-sell-amt">$0</span>
                                 </div>
-                                <input type="range" min="0" max="50" step="1" value="0" id="input-sell-rate" class="text-emerald-600 mb-3 cursor-pointer">
+                                <!-- Changed to absolute amount input capped at 1M -->
+                                <input type="range" min="0" max="1000000" step="1000" value="0" id="input-sell-amount" class="text-emerald-600 mb-3 cursor-pointer">
                                 
                                 <div id="sell-gain-container" class="flex justify-between items-center text-xs hidden">
                                     <div class="text-slate-500">Basis: <span id="disp-sell-basis-pct">10</span>%</div>
@@ -465,7 +466,7 @@
             preTax401k: 0,
             titheRate: 0,
             stockRate: 0,
-            sellStockRate: 0,
+            sellStockAmount: 0,
             costBasisPct: 10,
             linkTithe: false
         };
@@ -532,7 +533,7 @@
             const stockGainDonated = Math.max(0, stockDonationFMV - stockBasisDonated);
 
             // Stock Sale
-            const sellStockAmount = state.wages * (state.sellStockRate / 100);
+            const sellStockAmount = state.sellStockAmount;
             const sellStockBasis = sellStockAmount * (state.costBasisPct / 100);
             const capitalGainRealized = Math.max(0, sellStockAmount - sellStockBasis);
 
@@ -595,7 +596,7 @@
             // --- 7. Totals ---
             const totalTaxBill = totalFedTax + totalFica + totalIncomeTaxSALT;
             const effectiveRate = totalAGI > 0 ? (totalTaxBill / totalAGI) : 0;
-            const takeHomePay = (state.wages + sellStockAmount) - state.preTax401k - totalTaxBill - cashTitheAmount - stockDonationFMV;
+            const takeHomePay = (state.wages + sellStockAmount) - state.preTax401k - totalTaxBill - cashTitheAmount - stockDonationFMV; // NOW SUBTRACTS STOCK DONATION
 
             return {
                 wages: state.wages,
@@ -642,7 +643,7 @@
             
             let fedBreakdown = "";
             if (res.fedCapGainsTax > 0 || res.niitTax > 0) {
-                fedBreakdown = `(Ord: ${fmtMoney(res.fedOrdTax)} | CGT: ${fmtMoney(res.fedCapGainsTax)} | NIIT: ${fmtMoney(res.niitTax)})`;
+                fedBreakdown = `(Ord: ${fmtMoney(res.fedOrdTax)} | LTCGT: ${fmtMoney(res.fedCapGainsTax)} | NIIT: ${fmtMoney(res.niitTax)})`;
             }
             document.getElementById('res-fed-breakdown').innerText = fedBreakdown;
 
@@ -692,7 +693,7 @@
             }
 
             // Sell Stock UI
-            if (state.sellStockRate > 0) {
+            if (state.sellStockAmount > 0) {
                 document.getElementById('sell-gain-container').classList.remove('hidden');
                 document.getElementById('disp-realized-gain').innerText = fmtMoney(res.capitalGainRealized);
                 document.getElementById('basis-container').classList.remove('hidden');
@@ -755,7 +756,9 @@
             document.getElementById('disp-donate-basis-pct').innerText = state.costBasisPct;
             document.getElementById('disp-sell-basis-pct').innerText = state.costBasisPct;
             
-            document.getElementById('disp-sell-rate').innerText = state.sellStockRate;
+            // Sell rate percentage calculation for display
+            const sellPct = state.wages > 0 ? (state.sellStockAmount / state.wages) * 100 : 0;
+            document.getElementById('disp-sell-rate').innerText = sellPct.toFixed(1);
             document.getElementById('disp-sell-amt').innerText = fmtMoney(res.sellStockAmount);
             
             document.getElementById('disp-401k').innerText = fmtMoney(state.preTax401k);
@@ -781,10 +784,20 @@
                     if (rangeEl) rangeEl.value = val;
                 }
 
-                // Handle Link Logic
+                // Handle Link Logic: If Tithe changes, update Sell Stock Amount
                 if (key === 'titheRate' && state.linkTithe) {
-                    state.sellStockRate = val;
-                    document.getElementById('input-sell-rate').value = val;
+                    // Set Sell Stock Amount based on Tithe % of Wages
+                    state.sellStockAmount = state.wages * (val / 100);
+                    // Clamp to 1M
+                    state.sellStockAmount = Math.min(state.sellStockAmount, 1000000);
+                    document.getElementById('input-sell-amount').value = state.sellStockAmount;
+                }
+                
+                // If Wages change, update Sell Stock Amount if linked
+                if (key === 'wages' && state.linkTithe) {
+                    state.sellStockAmount = val * (state.titheRate / 100);
+                    state.sellStockAmount = Math.min(state.sellStockAmount, 1000000);
+                    document.getElementById('input-sell-amount').value = state.sellStockAmount;
                 }
 
                 updateUI();
@@ -795,8 +808,8 @@
         attach('input-wages-range', 'wages');
         attach('input-wages-num', 'wages');
         
-        // Sell Stock
-        attach('input-sell-rate', 'sellStockRate');
+        // Sell Stock (Amount input)
+        attach('input-sell-amount', 'sellStockAmount');
         
         // Tithe
         attach('input-tithe-rate', 'titheRate');
@@ -818,11 +831,14 @@
         // Checkbox
         document.getElementById('link-tithe').addEventListener('change', (e) => {
             state.linkTithe = e.target.checked;
-            const sellInput = document.getElementById('input-sell-rate');
+            const sellInput = document.getElementById('input-sell-amount');
             
             if (state.linkTithe) {
-                state.sellStockRate = state.titheRate;
-                sellInput.value = state.titheRate;
+                // Set Sell Amount to Tithe % of Wages
+                state.sellStockAmount = state.wages * (state.titheRate / 100);
+                state.sellStockAmount = Math.min(state.sellStockAmount, 1000000);
+                sellInput.value = state.sellStockAmount;
+                
                 sellInput.disabled = true;
                 sellInput.classList.add('cursor-not-allowed', 'opacity-50');
                 sellInput.classList.remove('cursor-pointer');
